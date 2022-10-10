@@ -1,3 +1,5 @@
-require("plugins")
-require("options")
-require("mappings")
+require "core.options"
+
+require("plugins").setup()
+
+require "core.mappings"
