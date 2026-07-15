@@ -8,9 +8,15 @@ font size) from data prompted once per machine at init time.
 
 ## What's managed
 
-| Tool    | Target                     | Notes                                   |
-| ------- | -------------------------- | --------------------------------------- |
-| Ghostty | `~/.config/ghostty/config` | Catppuccin Mocha, Victor Mono Nerd Font |
+| Tool                 | Target                      | Notes                                     |
+| -------------------- | --------------------------- | ----------------------------------------- |
+| Ghostty              | `~/.config/ghostty/config`  | Catppuccin Mocha, Victor Mono Nerd Font   |
+| Starship             | `~/.config/starship.toml`   | Prompt config                             |
+| Claude Code status   | `~/.claude/statusline.sh`   | Custom statusline (executable)            |
+
+> The Claude Code statusline needs to be wired in `~/.claude/settings.json`:
+> `"statusLine": { "command": "~/.claude/statusline.sh" }`. That file is not
+> managed here (it can hold machine-specific settings), so set it once per machine.
 
 ## New machine
 
