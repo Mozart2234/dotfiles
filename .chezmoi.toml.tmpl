@@ -1,0 +1,5 @@
+{{/* Per-machine config, generated once at `chezmoi init` and stored locally. */}}
+{{- $lowDpi := promptBoolOnce . "lowDpi" "Low-DPI external monitor? (uses a slightly smaller Ghostty font)" -}}
+
+[data]
+    lowDpi = {{ $lowDpi }}

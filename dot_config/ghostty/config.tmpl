@@ -1,0 +1,49 @@
+# ─────────────────────────────────────────────────────────────
+# Ghostty configuration — managed by chezmoi
+# Theme: Catppuccin (follows macOS appearance)  ·  Font: Victor Mono Nerd Font Mono
+# Machine-specific values are templated. Edit the SOURCE, never this file:
+#   chezmoi edit ~/.config/ghostty/config
+# ─────────────────────────────────────────────────────────────
+
+# Theme (built-in, no install required)
+# Follows the macOS system appearance: light mode → Latte, dark mode → Mocha
+theme = Catppuccin Mocha
+
+# Font
+font-family = "VictorMono Nerd Font Mono"
+# SemiBold base weight: reads solid on low-DPI external monitors where the
+# Regular face looks anemic. The heavier weight carries legibility at a
+# slightly smaller size, so font-size drops accordingly on low-DPI displays.
+font-style = "SemiBold"
+{{- if .lowDpi }}
+font-size = 14
+{{- else }}
+font-size = 15
+{{- end }}
+# Victor Mono shines in its cursive italics — keep them enabled
+font-style-italic = "SemiBoldItalic"
+# Software thickening on top of the heavier weight (already at max strength 255)
+font-thicken = true
+
+# Cursor
+cursor-style = block
+cursor-style-blink = false
+shell-integration-features = no-cursor
+
+# Window
+window-padding-x = 14
+window-padding-y = 10
+window-padding-balance = true
+background-opacity = 1.0
+macos-titlebar-style = tabs
+
+# On macOS, make the left Option key behave as Alt (needed for many CLI keybinds)
+macos-option-as-alt = left
+
+# Scrollback
+scrollback-limit = 10000
+
+# Misc quality-of-life
+copy-on-select = clipboard
+mouse-hide-while-typing = true
+confirm-close-surface = false
