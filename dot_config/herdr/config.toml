@@ -1,0 +1,77 @@
+# herdr configuration
+# Base taken from Gentleman.Dots, extended for this machine.
+
+[theme]
+# Built-in dark theme with neutral foregrounds so Herdr does not inherit
+# Ghostty bright-black selected rows or Kanagawa's warm/yellow label text.
+name = "one-dark"
+
+[theme.custom]
+panel_bg = "#06080f"
+# Match Pi's Gentle theme, with a muted cyan for Herdr chrome.
+accent = "#6FA0AF"
+green = "#B7CC85"
+blue = "#6FA0AF"
+red = "#CB7C94"
+yellow = "#DEBA87"
+
+[ui]
+accent = "#6FA0AF"
+
+# Show which agent lives in each split pane, straight on the border.
+# Without this you only see agent labels in the sidebar.
+show_agent_labels_on_pane_borders = true
+
+# "spaces" groups the sidebar by workspace (default).
+# Switch to "priority" to turn the sidebar into an attention queue:
+# whoever is blocked or waiting on you floats to the top.
+# agent_panel_sort = "priority"
+
+# Desktop notifications when a background agent finishes or needs input.
+# This is the whole point of a multi-agent workspace: stop babysitting panes.
+#   off      = nothing
+#   herdr    = in-app toast (only visible if you are looking at Herdr)
+#   terminal = ask the outer terminal to raise an OS notification
+#   system   = ask macOS Notification Center directly
+[ui.toast]
+delivery = "system"
+delay_seconds = 1
+
+[ui.sound]
+enabled = true
+
+[session]
+# After a server restart, put agents back into their real conversation
+# sessions instead of an empty shell. Requires official integrations.
+resume_agents_on_restore = true
+
+[worktrees]
+# Where `prefix+shift+g` (new_worktree) puts git worktrees.
+directory = "~/.herdr/worktrees"
+
+[keys]
+# Match tmux/Zellij-style prefix muscle memory.
+prefix = "ctrl+a"
+
+# Move between agents in the sidebar.
+# Avoid Herdr's built-in prefix+shift+j/k pane-swap bindings.
+previous_agent = "prefix+alt+k"
+next_agent = "prefix+alt+j"
+
+# Jump straight to agent N (1..9) as listed in the sidebar.
+# Use Ctrl after the prefix: Alt+number is owned by skhd/yabai spaces,
+# and Shift+number did not reach Herdr reliably in the current terminal setup.
+focus_agent = "prefix+ctrl+1..9"
+
+# Cycle workspaces without opening the picker.
+previous_workspace = "prefix+["
+next_workspace = "prefix+]"
+
+# Lazygit in a modal popup: opens over the layout, closes when lazygit exits.
+# No pane created, no split disturbed.
+[[keys.command]]
+key = "prefix+alt+g"
+type = "popup"
+command = "lazygit"
+width = "90%"
+height = "90%"
