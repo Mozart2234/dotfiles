@@ -36,7 +36,8 @@ Edit the source → `chezmoi apply` → done. Everywhere.
 | :--- | :--- | :--- |
 | 👻 **Ghostty** | `~/.config/ghostty/config` | Catppuccin Mocha · Victor Mono Nerd Font · per-machine font size |
 | 🚀 **Starship** | `~/.config/starship.toml` | Cross-shell prompt |
-| 🤖 **Claude Code** | `~/.claude/statusline.sh` | Custom statusline (executable) |
+| 🤖 **Claude Code** | `~/.claude/statusline.sh` | Custom statusline — context, cost, git, worktree |
+| 🐑 **Herdr** | `~/.config/herdr/config.toml` | Agent workspace — tmux-style keys, desktop notifications |
 
 > [!NOTE]
 > The Claude Code statusline ships as a script but isn't auto-wired. Add this to
@@ -45,6 +46,98 @@ Edit the source → `chezmoi apply` → done. Everywhere.
 > ```json
 > "statusLine": { "command": "~/.claude/statusline.sh" }
 > ```
+
+---
+
+## 🤖 Claude Code statusline
+
+A single line under the prompt, rendered from the session JSON Claude Code pipes
+to the script on stdin.
+
+```
+󰉋 dotfiles  ·    main ✗  ·  󰚩 Opus 5 → sdd-apply  ·  ████████░░ 87%  ·  $12.50  ·  [NORMAL]
+```
+
+| Segment | Source field | Why it's there |
+| :--- | :--- | :--- |
+| 󰉋 directory | `worktree.name` → `workspace.current_dir` | Worktree name wins, so parallel checkouts stay distinguishable |
+|  branch + `✗` | one `git status --porcelain -b` call | Branch and dirty state from a single fork |
+| 󰚩 model | `model.display_name` | Which model is actually answering |
+| → agent | `agent.name` | Present only while a subagent is running |
+| context bar | `context_window.used_percentage` | Green < 50% · orange < 80% · red ≥ 80% — your warning before compaction |
+| cost | `cost.total_cost_usd` | Running spend for the session |
+| `[MODE]` | `vim.mode` | Only when vim mode is on |
+
+Optional segments render only when their field is present, so a bare session
+degrades to `󰉋 dir · 󰚩 Claude`.
+
+> [!TIP]
+> Inspect the full payload with `jq` — it also carries `version`,
+> `output_style.name`, `context_window.remaining_percentage`,
+> `cost.total_lines_added/removed`, and `exceeds_200k_tokens`.
+
+<details>
+<summary><b>Two bash traps this script works around</b></summary>
+
+<br>
+
+**Empty fields vanish with tab-separated `read`.** Tab is an *IFS whitespace
+character*, so bash collapses runs of them into one delimiter even when `IFS` is
+set explicitly — every optional field shifts the rest of the values left:
+
+```sh
+IFS=$'\t' read -r a b c d   # ✗ empty fields silently disappear
+```
+
+The script has `jq` emit one field per line (`| .[]`) and reads them into an
+array instead.
+
+**No `mapfile`.** macOS ships bash 3.2, which predates it. The read loop is
+`while IFS= read -r line; do fields+=("$line"); done`.
+
+</details>
+
+---
+
+## 🐑 Herdr
+
+[Herdr](https://herdr.dev) is a terminal workspace manager built for AI coding
+agents: persistent server, workspaces, tabs, splits, and a sidebar that tracks
+which agent is idle, working, or blocked on you.
+
+The theme and prefix come from
+[Gentleman.Dots](https://github.com/Gentleman-Programming/Gentleman.Dots);
+the rest is local.
+
+| Key | Action |
+| :--- | :--- |
+| `ctrl+a` | Prefix — tmux/Zellij muscle memory |
+| `prefix+ctrl+1..9` | Jump to agent N in the sidebar |
+| `prefix+alt+j` / `k` | Next / previous agent |
+| `prefix+[` / `]` | Cycle workspaces without the picker |
+| `prefix+alt+g` | Lazygit in a modal popup — no pane, no split disturbed |
+| `prefix+shift+g` | New git worktree (created under `~/.herdr/worktrees`) |
+
+Beyond keys, the config turns on:
+
+- **`[ui.toast] delivery = "system"`** — macOS notifications when a background
+  agent finishes or needs input. Without it you babysit panes, which defeats the
+  point of a multi-agent workspace.
+- **`resume_agents_on_restore`** — after a server restart, agents return to their
+  real conversation instead of an empty shell.
+- **`show_agent_labels_on_pane_borders`** — which agent lives in which split,
+  read straight off the border.
+
+| Command | What it does |
+| :--- | :--- |
+| `herdr config check` | Validate `config.toml` |
+| `herdr server reload-config` | Apply changes live — nothing restarts |
+| `herdr --default-config` | Print every option, fully commented |
+| `herdr channel show` / `herdr update` | Check the channel / install the latest build |
+
+> [!WARNING]
+> `herdr update` restarts the server. Run it from outside a Herdr pane, or pass
+> `--handoff` — otherwise it takes down the session you're sitting in.
 
 ---
 
@@ -109,6 +202,8 @@ One source, correct on every screen. ✨
 ├── dot_config/
 │   ├── ghostty/
 │   │   └── config.tmpl             # → ~/.config/ghostty/config
+│   ├── herdr/
+│   │   └── config.toml             # → ~/.config/herdr/config.toml
 │   └── starship.toml               # → ~/.config/starship.toml
 ├── dot_claude/
 │   └── executable_statusline.sh    # → ~/.claude/statusline.sh (+x preserved)
