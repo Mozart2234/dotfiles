@@ -1,57 +1,58 @@
-# herdr configuration
-# Base taken from Gentleman.Dots, extended for this machine.
+# Herdr — terminal workspace manager for coding agents
+# Reference: `herdr --default-config`  ·  Validate: `herdr config check`
+# Reload without restart: `herdr server reload-config` (or prefix+shift+r)
 
+onboarding = false
+
+# ---------------------------------------------------------------------------
+# Theme — mirrors ~/.config/ghostty/config (Catppuccin, follows macOS appearance)
+# ---------------------------------------------------------------------------
 [theme]
-# Built-in dark theme with neutral foregrounds so Herdr does not inherit
-# Ghostty bright-black selected rows or Kanagawa's warm/yellow label text.
-name = "one-dark"
+name = "catppuccin"
+auto_switch = true
+dark_name = "catppuccin"
+light_name = "catppuccin-latte"
 
+# Naruto-inspired accents taken from Catppuccin's own palette (peach/red), so they
+# stay comfortable for all-day use. Focused pane border = peach; "working" agents
+# render in peach instead of yellow. Each mode uses its flavor's shade for contrast.
+# Base table = dark (Mocha), so it applies even if appearance detection fails;
+# [theme.custom.light] layers on top when auto_switch selects light.
 [theme.custom]
-panel_bg = "#06080f"
-# Match Pi's Gentle theme, with a muted cyan for Herdr chrome.
-accent = "#6FA0AF"
-green = "#B7CC85"
-blue = "#6FA0AF"
-red = "#CB7C94"
-yellow = "#DEBA87"
+accent = "#fab387" # Mocha peach
+yellow = "#fab387" # working state
+red = "#f38ba8"    # blocked state (Mocha red)
+# Let Ghostty's background (Uzumaki wallpaper + macOS glass) show through herdr.
+panel_bg = "reset"
 
-[ui]
-accent = "#6FA0AF"
+[theme.custom.light]
+accent = "#fe640b" # Latte peach
+yellow = "#fe640b" # working state
+red = "#d20f39"    # blocked state (Latte red)
 
-# Show which agent lives in each split pane, straight on the border.
-# Without this you only see agent labels in the sidebar.
-show_agent_labels_on_pane_borders = true
+[terminal]
+# Inherit the cwd of the pane/workspace a new pane is created from.
+new_cwd = "follow"
 
-# "spaces" groups the sidebar by workspace (default).
-# Switch to "priority" to turn the sidebar into an attention queue:
-# whoever is blocked or waiting on you floats to the top.
-# agent_panel_sort = "priority"
+[update]
+channel = "stable"
+version_check = true
+# Agent-detection manifests: keeps working/blocked/idle accurate as agent CLIs change.
+manifest_check = true
 
-# Desktop notifications when a background agent finishes or needs input.
-# This is the whole point of a multi-agent workspace: stop babysitting panes.
-#   off      = nothing
-#   herdr    = in-app toast (only visible if you are looking at Herdr)
-#   terminal = ask the outer terminal to raise an OS notification
-#   system   = ask macOS Notification Center directly
-[ui.toast]
-delivery = "system"
-delay_seconds = 1
-
-[ui.sound]
-enabled = true
-
+# ---------------------------------------------------------------------------
+# Session — restore agents into their native conversations after a restart.
+# Requires the installed integration hook (see `herdr integration status`).
+# ---------------------------------------------------------------------------
 [session]
-# After a server restart, put agents back into their real conversation
-# sessions instead of an empty shell. Requires official integrations.
 resume_agents_on_restore = true
 
-[worktrees]
-# Where `prefix+shift+g` (new_worktree) puts git worktrees.
-directory = "~/.herdr/worktrees"
-
+# ---------------------------------------------------------------------------
+# Keys — prefix is ctrl+s, matching the long-standing tmux muscle memory.
+# Safe because tmux is no longer nested inside Herdr; nothing else claims ctrl+s.
+# ---------------------------------------------------------------------------
 [keys]
-# Match tmux/Zellij-style prefix muscle memory.
-prefix = "ctrl+a"
+prefix = "ctrl+s"
 
 # Move between agents in the sidebar.
 # Avoid Herdr's built-in prefix+shift+j/k pane-swap bindings.
@@ -59,19 +60,92 @@ previous_agent = "prefix+alt+k"
 next_agent = "prefix+alt+j"
 
 # Jump straight to agent N (1..9) as listed in the sidebar.
-# Use Ctrl after the prefix: Alt+number is owned by skhd/yabai spaces,
-# and Shift+number did not reach Herdr reliably in the current terminal setup.
+# Use Ctrl after the prefix: Alt+number is owned by skhd/yabai spaces on
+# machines that run skhd.
 focus_agent = "prefix+ctrl+1..9"
 
-# Cycle workspaces without opening the picker.
-previous_workspace = "prefix+["
-next_workspace = "prefix+]"
+# Back-and-forth between the last two panes.
+last_pane = "prefix+space"
 
-# Lazygit in a modal popup: opens over the layout, closes when lazygit exits.
-# No pane created, no split disturbed.
+# Split naming that matches the visual result rather than the axis name.
+split_vertical = "prefix+v"
+split_horizontal = "prefix+minus"
+
 [[keys.command]]
 key = "prefix+alt+g"
 type = "popup"
 command = "lazygit"
 width = "90%"
 height = "90%"
+
+# ---------------------------------------------------------------------------
+# UI — optimized for "which agent is blocked on me right now?"
+# ---------------------------------------------------------------------------
+[ui]
+# Accent lives in [theme.custom] (dark) and [theme.custom.light] so it follows the appearance.
+
+# Attention queue instead of grouping by space: blocked agents float to the top.
+agent_panel_sort = "priority"
+
+# Show the detected agent in the pane border when the pane has no manual name.
+show_agent_labels_on_pane_borders = true
+
+sidebar_width = 30
+sidebar_collapsed_mode = "compact"
+
+# Create tabs immediately instead of prompting for a name.
+prompt_new_tab_name = false
+
+# "always" also frames a lone pane, so the accent border and its label stay visible.
+pane_borders = "always"
+pane_gaps = true
+
+# Agent summary from the agent-pulse plugin (github.com/Mozart2234/herdr-agent-pulse), e.g. "🍥 2 · 🦊 1".
+# herdr shows the last output line; the file is empty when no agent is active.
+tab_bar_right = [
+  { type = "command", command = "cat ~/.local/state/herdr/plugins/mozart2234.agent-pulse/summary.txt 2>/dev/null", interval_seconds = 1 },
+]
+
+[ui.sidebar.agents]
+row_gap = 0
+rows = [["state_icon", "workspace", "tab"], ["agent"]]
+
+[ui.sidebar.agents.rows_by_agent]
+# Claude Code reports its current activity in the terminal title — surface it.
+claude = [
+  ["state_icon", "workspace", "tab"],
+  ["terminal_title_stripped"],
+  ["agent"],
+]
+
+[ui.sidebar.spaces]
+row_gap = 0
+rows = [["state_icon", "workspace"], ["branch", "git_status"]]
+
+# Desktop notifications when a background agent finishes or gets blocked.
+# "terminal" sends OSC 9 to Ghostty, which raises a native macOS notification
+# (click focuses Ghostty). "system" would fall back to osascript without terminal-notifier.
+[ui.toast]
+delivery = "terminal"
+delay_seconds = 1
+
+[ui.toast.herdr]
+position = "bottom-right"
+
+[ui.sound]
+enabled = true
+# Naruto clips (personal use, not versioned). Paths are relative to this file.
+# Short, voiceless effects for all-day use; alternatives live in sounds/candidates/.
+done_path = "sounds/done.mp3"       # shadow-clone smoke "poof" (1.2 s) when an agent finishes
+request_path = "sounds/request.mp3" # Sharingan activation (2.0 s) when an agent needs you
+
+# ---------------------------------------------------------------------------
+# Experimental
+# ---------------------------------------------------------------------------
+[experimental]
+# Keep recent pane screen history across full server restarts.
+pane_history = true
+
+[advanced]
+# Agent sessions produce long transcripts; 10MB is the Ghostty-matching default.
+scrollback_limit_bytes = 10000000
