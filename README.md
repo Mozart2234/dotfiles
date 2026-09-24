@@ -128,22 +128,6 @@ Beyond keys, the config turns on:
 - **`show_agent_labels_on_pane_borders`** — which agent lives in which split,
   read straight off the border.
 
-### Agent Pulse plugin
-
-[herdr-agent-pulse](https://github.com/Mozart2234/herdr-agent-pulse) animates
-the pane border while an agent works, puts a state icon on the tab
-(`🍥` working · `🦊` needs you · `🎖` done) and writes a summary for the tab bar.
-`chezmoi apply` installs it through
-`.chezmoiscripts/run_onchange_after_install-herdr-agent-pulse.sh` and manages
-its `config.json` (`naruto` theme, tab icons on). To show the summary, add to
-`[ui]` in `config.toml`:
-
-```toml
-tab_bar_right = [
-  { type = "command", command = "cat ~/.local/state/herdr/plugins/mozart2234.agent-pulse/summary.txt 2>/dev/null", interval_seconds = 1 },
-]
-```
-
 | Command | What it does |
 | :--- | :--- |
 | `herdr config check` | Validate `config.toml` |
@@ -154,6 +138,23 @@ tab_bar_right = [
 > [!WARNING]
 > `herdr update` restarts the server. Run it from outside a Herdr pane, or pass
 > `--handoff` — otherwise it takes down the session you're sitting in.
+
+### Agent Pulse plugin
+
+[herdr-agent-pulse](https://github.com/Mozart2234/herdr-agent-pulse) animates
+the pane border while an agent works, puts a state icon on the tab
+(`🍥` working · `🦊` needs you · `🎖` done) and writes a summary for the tab bar.
+`chezmoi apply` installs it through
+`.chezmoiscripts/run_after_install-herdr-agent-pulse.sh`
+(pinned to a release tag, retried on every apply until it succeeds) and manages
+its `config.json` (`naruto` theme, tab icons on). To show the summary, add to
+`[ui]` in `config.toml`:
+
+```toml
+tab_bar_right = [
+  { type = "command", command = "cat ~/.local/state/herdr/plugins/mozart2234.agent-pulse/summary.txt 2>/dev/null", interval_seconds = 1 },
+]
+```
 
 ---
 
@@ -216,7 +217,7 @@ One source, correct on every screen. ✨
 .
 ├── .chezmoi.toml.tmpl              # per-machine prompts (font size, etc.)
 ├── .chezmoiscripts/
-│   └── run_onchange_after_install-herdr-agent-pulse.sh  # installs the herdr plugin
+│   └── run_after_install-herdr-agent-pulse.sh  # installs the herdr plugin
 ├── dot_config/
 │   ├── ghostty/
 │   │   └── config.tmpl             # → ~/.config/ghostty/config
