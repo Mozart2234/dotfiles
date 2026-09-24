@@ -1,0 +1,35 @@
+#!/bin/sh
+# Ensures the agent-pulse daemon is running. Herdr runs this on startup and
+# on every pane.agent_status_changed event (unsupervised, up to 32
+# concurrent), so the common case -- daemon already running -- must return
+# in a handful of syscalls and never block.
+set -eu
+
+if [ -n "${HERDR_PLUGIN_STATE_DIR:-}" ]; then
+    STATE_DIR="$HERDR_PLUGIN_STATE_DIR"
+else
+    STATE_DIR="$HOME/.local/state/herdr-agent-pulse"
+fi
+PID_FILE="$STATE_DIR/daemon.pid"
+
+if [ -f "$PID_FILE" ]; then
+    PID=$(cat "$PID_FILE" 2>/dev/null || true)
+    if [ -n "$PID" ] && kill -0 "$PID" 2>/dev/null; then
+        exit 0
+    fi
+fi
+
+PYTHON_BIN=$(command -v python3 2>/dev/null || true)
+if [ -z "$PYTHON_BIN" ]; then
+    exit 0
+fi
+
+mkdir -p "$STATE_DIR"
+PLUGIN_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+
+(
+    cd "$PLUGIN_ROOT"
+    nohup "$PYTHON_BIN" -m agent_pulse.daemon </dev/null >/dev/null 2>&1 &
+)
+
+exit 0

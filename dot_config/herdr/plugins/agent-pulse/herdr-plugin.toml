@@ -1,0 +1,20 @@
+id = "local.agent-pulse"
+name = "Agent Pulse"
+version = "0.1.0"
+description = "Animated pane-border activity, a tab state icon, and a tab-bar-right summary while a coding agent works."
+min_herdr_version = "0.9.1"
+platforms = ["macos", "linux"]
+
+# Ensures the daemon is running whenever herdr starts (or hands off a live
+# session). herdr only runs [[startup]] on server boot / live handoff, never
+# on `plugin link`/`enable`, so the [[events]] hook below covers the common
+# case of linking the plugin into an already-running herdr.
+[[startup]]
+command = ["bin/ensure-daemon"]
+
+# Fires on every agent status transition (up to 32 concurrent, unsupervised,
+# no timeout). ensure-daemon must stay fast: it only checks whether the
+# daemon's pidfile is alive and exits immediately either way.
+[[events]]
+on = "pane.agent_status_changed"
+command = ["bin/ensure-daemon"]
