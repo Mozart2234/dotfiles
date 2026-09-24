@@ -128,6 +128,22 @@ Beyond keys, the config turns on:
 - **`show_agent_labels_on_pane_borders`** — which agent lives in which split,
   read straight off the border.
 
+### Agent Pulse plugin
+
+[herdr-agent-pulse](https://github.com/Mozart2234/herdr-agent-pulse) animates
+the pane border while an agent works, puts a state icon on the tab
+(`🍥` working · `🦊` needs you · `🎖` done) and writes a summary for the tab bar.
+`chezmoi apply` installs it through
+`.chezmoiscripts/run_onchange_after_install-herdr-agent-pulse.sh` and manages
+its `config.json` (`naruto` theme, tab icons on). To show the summary, add to
+`[ui]` in `config.toml`:
+
+```toml
+tab_bar_right = [
+  { type = "command", command = "cat ~/.local/state/herdr/plugins/mozart2234.agent-pulse/summary.txt 2>/dev/null", interval_seconds = 1 },
+]
+```
+
 | Command | What it does |
 | :--- | :--- |
 | `herdr config check` | Validate `config.toml` |
@@ -199,11 +215,15 @@ One source, correct on every screen. ✨
 ```
 .
 ├── .chezmoi.toml.tmpl              # per-machine prompts (font size, etc.)
+├── .chezmoiscripts/
+│   └── run_onchange_after_install-herdr-agent-pulse.sh  # installs the herdr plugin
 ├── dot_config/
 │   ├── ghostty/
 │   │   └── config.tmpl             # → ~/.config/ghostty/config
 │   ├── herdr/
-│   │   └── config.toml             # → ~/.config/herdr/config.toml
+│   │   ├── config.toml             # → ~/.config/herdr/config.toml
+│   │   └── plugins/config/mozart2234.agent-pulse/
+│   │       └── config.json         # → agent-pulse theme and options
 │   └── starship.toml               # → ~/.config/starship.toml
 ├── dot_claude/
 │   └── executable_statusline.sh    # → ~/.claude/statusline.sh (+x preserved)

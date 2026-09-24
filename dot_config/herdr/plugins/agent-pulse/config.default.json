@@ -1,6 +1,0 @@
-{
-  "_comment": "Documented defaults. Copy this file to $HERDR_PLUGIN_CONFIG_DIR/config.json and edit; a missing file or missing key falls back to these values.",
-  "theme": "iterm",
-  "fps": 4,
-  "tab_icons": true
-}
