@@ -91,8 +91,8 @@ Ghostty) with Naruto-inspired peach accents: the focused pane border and
 | Key | Action |
 | :--- | :--- |
 | `ctrl+s` | Prefix — tmux muscle memory (tmux is no longer nested inside Herdr) |
-| `prefix+alt+1..9` | Jump to agent N in the sidebar |
-| `prefix+shift+j` / `k` | Next / previous agent |
+| `prefix+ctrl+1..9` | Jump to agent N in the sidebar (Ctrl, because skhd/yabai own Alt+number) |
+| `prefix+alt+j` / `k` | Next / previous agent (keeps Herdr's `prefix+shift+j/k` pane swap free) |
 | `prefix+space` | Back and forth between the last two panes |
 | `prefix+v` / `prefix+minus` | Split side by side / stacked |
 | `prefix+alt+g` | Lazygit in a modal popup — no pane, no split disturbed |

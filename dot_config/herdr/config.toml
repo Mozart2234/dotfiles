@@ -54,10 +54,15 @@ resume_agents_on_restore = true
 [keys]
 prefix = "ctrl+s"
 
-# Jump straight to whichever agent needs attention.
-previous_agent = "prefix+shift+k"
-next_agent = "prefix+shift+j"
-focus_agent = "prefix+alt+1..9"
+# Move between agents in the sidebar.
+# Avoid Herdr's built-in prefix+shift+j/k pane-swap bindings.
+previous_agent = "prefix+alt+k"
+next_agent = "prefix+alt+j"
+
+# Jump straight to agent N (1..9) as listed in the sidebar.
+# Use Ctrl after the prefix: Alt+number is owned by skhd/yabai spaces on
+# machines that run skhd.
+focus_agent = "prefix+ctrl+1..9"
 
 # Back-and-forth between the last two panes.
 last_pane = "prefix+space"
@@ -77,7 +82,7 @@ height = "90%"
 # UI — optimized for "which agent is blocked on me right now?"
 # ---------------------------------------------------------------------------
 [ui]
-# Accent lives in [theme.custom.dark]/[theme.custom.light] so it follows the appearance.
+# Accent lives in [theme.custom] (dark) and [theme.custom.light] so it follows the appearance.
 
 # Attention queue instead of grouping by space: blocked agents float to the top.
 agent_panel_sort = "priority"
