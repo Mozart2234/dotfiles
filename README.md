@@ -84,8 +84,8 @@ degrades to `🍃 dir │ 🥷 Claude`.
 agents: persistent server, workspaces, tabs, splits, and a sidebar that tracks
 which agent is idle, working, or blocked on you.
 
-The config uses Catppuccin (Mocha/Latte, following macOS appearance like
-Ghostty) with Naruto-inspired peach accents: the focused pane border and
+The config uses Catppuccin Mocha (always dark, matching Ghostty) with
+Naruto-inspired peach accents: the focused pane border and
 "working" agents are peach, blocked agents red.
 
 | Key | Action |

@@ -5,30 +5,22 @@
 onboarding = false
 
 # ---------------------------------------------------------------------------
-# Theme — mirrors ~/.config/ghostty/config (Catppuccin, follows macOS appearance)
+# Theme — mirrors ~/.config/ghostty/config (Catppuccin Mocha, always dark)
 # ---------------------------------------------------------------------------
+# Fixed dark flavor, no auto_switch: Ghostty is pinned to Mocha, so following the
+# macOS appearance would render a light herdr UI on top of a dark terminal.
 [theme]
 name = "catppuccin"
-auto_switch = true
-dark_name = "catppuccin"
-light_name = "catppuccin-latte"
 
 # Naruto-inspired accents taken from Catppuccin's own palette (peach/red), so they
 # stay comfortable for all-day use. Focused pane border = peach; "working" agents
-# render in peach instead of yellow. Each mode uses its flavor's shade for contrast.
-# Base table = dark (Mocha), so it applies even if appearance detection fails;
-# [theme.custom.light] layers on top when auto_switch selects light.
+# render in peach instead of yellow.
 [theme.custom]
 accent = "#fab387" # Mocha peach
 yellow = "#fab387" # working state
 red = "#f38ba8"    # blocked state (Mocha red)
 # Let Ghostty's background (Uzumaki wallpaper + macOS glass) show through herdr.
 panel_bg = "reset"
-
-[theme.custom.light]
-accent = "#fe640b" # Latte peach
-yellow = "#fe640b" # working state
-red = "#d20f39"    # blocked state (Latte red)
 
 [terminal]
 # Inherit the cwd of the pane/workspace a new pane is created from.
@@ -82,7 +74,7 @@ height = "90%"
 # UI — optimized for "which agent is blocked on me right now?"
 # ---------------------------------------------------------------------------
 [ui]
-# Accent lives in [theme.custom] (dark) and [theme.custom.light] so it follows the appearance.
+# Accent lives in [theme.custom] (Mocha, always dark).
 
 # Attention queue instead of grouping by space: blocked agents float to the top.
 agent_panel_sort = "priority"
