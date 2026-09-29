@@ -73,6 +73,14 @@ command = "lazygit"
 width = "90%"
 height = "90%"
 
+# Toggle the cc-sidebar task panel (github.com/Mozart2234/cc-sidebar) to the
+# right of the focused pane. "b" for bar.
+[[keys.command]]
+key = "prefix+b"
+type = "shell"
+command = "~/.local/bin/cc-sidebar-open"
+description = "Toggle cc-sidebar next to the current pane"
+
 # ---------------------------------------------------------------------------
 # UI — optimized for "which agent is blocked on me right now?"
 # ---------------------------------------------------------------------------
