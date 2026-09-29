@@ -4,6 +4,12 @@
 
 input=$(cat)
 
+# Feed cc-sidebar (context, cost, model) in the background. Its output is
+# discarded so it never holds the statusline pipe open or slows the render.
+if command -v cc-sidebar >/dev/null 2>&1; then
+  printf '%s' "$input" | cc-sidebar tap-statusline >/dev/null 2>&1 &
+fi
+
 c() { printf '\033[38;2;%sm' "$1"; }
 RESET='\033[0m'; BOLD='\033[1m'
 ORANGE="255;140;0"      # Naruto jumpsuit
