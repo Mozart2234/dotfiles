@@ -88,6 +88,10 @@ The config uses Catppuccin Mocha (always dark, matching Ghostty) with
 Naruto-inspired peach accents: the focused pane border and
 "working" agents are peach, blocked agents red.
 
+Notification sounds come from the private `Mozart2234/herdr-sounds` repo,
+cloned into `~/.config/herdr/sounds` via `.chezmoiexternal.toml` (needs SSH
+access to that repo). The clips are copyrighted, so they stay out of this one.
+
 | Key | Action |
 | :--- | :--- |
 | `ctrl+s` | Prefix — tmux muscle memory (tmux is no longer nested inside Herdr) |

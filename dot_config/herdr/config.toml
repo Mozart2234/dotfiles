@@ -126,10 +126,11 @@ position = "bottom-right"
 
 [ui.sound]
 enabled = true
-# Naruto clips (personal use, not versioned). Paths are relative to this file.
+# Clips come from the private Mozart2234/herdr-sounds repo (see .chezmoiexternal.toml).
+# Paths are relative to this file; done/request.mp3 are symlinks into sounds/packs/.
 # Short, voiceless effects for all-day use; alternatives live in sounds/candidates/.
-done_path = "sounds/done.mp3"       # shadow-clone smoke "poof" (1.2 s) when an agent finishes
-request_path = "sounds/request.mp3" # Sharingan activation (2.0 s) when an agent needs you
+done_path = "sounds/done.mp3"       # when an agent finishes
+request_path = "sounds/request.mp3" # when an agent needs you
 
 # ---------------------------------------------------------------------------
 # Experimental

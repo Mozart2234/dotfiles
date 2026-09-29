@@ -1,0 +1,10 @@
+# External sources pulled by chezmoi on apply.
+
+# herdr sound clips (copyrighted, personal use) live in a PRIVATE repo so they
+# never land in this public one. Cloned as a whole git repo because
+# done.mp3/request.mp3 are symlinks into packs/, which a per-file copy would break.
+# Requires SSH access to GitHub as Mozart2234. Add clips there, then `chezmoi update`.
+[".config/herdr/sounds"]
+    type = "git-repo"
+    url = "git@github.com:Mozart2234/herdr-sounds.git"
+    refreshPeriod = "168h"
