@@ -19,6 +19,9 @@ name = "catppuccin"
 accent = "#fab387" # Mocha peach
 yellow = "#fab387" # working state
 red = "#f38ba8"    # blocked state (Mocha red)
+# Selected row in the sidebar (spaces/agents). The default is Mocha base, the
+# same as the background, so the selection was nearly invisible.
+active_row_bg = "#604b49" # 30% peach over Mocha base: a dark Naruto-orange tint
 # Let Ghostty's background (Uzumaki wallpaper + macOS glass) show through herdr.
 panel_bg = "reset"
 
