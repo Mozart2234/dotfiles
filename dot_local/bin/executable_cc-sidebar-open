@@ -3,46 +3,64 @@
 #
 # Usage: cc-sidebar-open [PANE_ID]
 #
-# Without PANE_ID it targets the focused pane. If a cc-sidebar pane is already
-# open in that tab it is closed; otherwise a split opens to the right, running
-# `cc-sidebar watch` pinned to the Claude session herdr detected in the pane
-# (or auto-selected by project directory when the pane has no Claude session).
+# Without PANE_ID it targets the focused pane. If this script already opened a
+# sidebar in that tab, that pane is closed; otherwise a split opens to the
+# right, running `cc-sidebar watch` pinned to the Claude session herdr detected
+# in the pane (or auto-selected by project directory when there is none).
 # Bound to prefix+b in ~/.config/herdr/config.toml.
 
 set -eu
 
 lang="${CC_SIDEBAR_LANG:-es}"
+# Share of the width the original pane keeps; the sidebar gets the rest.
+keep_ratio=0.7
+# Text that must appear in the sidebar pane's title, on top of the recorded
+# pane id, before this script closes it. It is part of the launch command.
+marker="cc-sidebar watch"
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/cc-sidebar/herdr"
 
-command -v herdr >/dev/null 2>&1 || { echo "cc-sidebar-open: herdr not found" >&2; exit 1; }
-command -v jq >/dev/null 2>&1 || { echo "cc-sidebar-open: jq not found" >&2; exit 1; }
+die() { echo "cc-sidebar-open: $*" >&2; exit 1; }
+
+command -v herdr >/dev/null 2>&1 || die "herdr not found"
+command -v jq >/dev/null 2>&1 || die "jq not found"
 
 panes=$(herdr pane list)
+field() { # field PANE_ID JQ_EXPR -> one raw value of that pane
+  printf '%s' "$panes" | jq -r --arg id "$1" ".result.panes[] | select(.pane_id == \$id) | $2"
+}
 
 if [ $# -gt 0 ]; then
+  [ -n "$1" ] || die "empty PANE_ID argument"
   target=$1
 else
   target=$(printf '%s' "$panes" | jq -r '[.result.panes[] | select(.focused)][0].pane_id // empty')
+  [ -n "$target" ] || die "no focused pane"
 fi
-[ -n "$target" ] || { echo "cc-sidebar-open: no focused pane" >&2; exit 1; }
 
-info=$(printf '%s' "$panes" | jq -r --arg id "$target" '
-  .result.panes[] | select(.pane_id == $id) |
-  [.tab_id, (.foreground_cwd // .cwd // ""),
-   (if .agent_session.agent == "claude" then .agent_session.value else "" end)] | @tsv')
-[ -n "$info" ] || { echo "cc-sidebar-open: unknown pane $target" >&2; exit 1; }
+tab=$(field "$target" '.tab_id // empty')
+[ -n "$tab" ] || die "unknown pane $target"
 
-tab=$(printf '%s' "$info" | cut -f1)
-cwd=$(printf '%s' "$info" | cut -f2)
-session=$(printf '%s' "$info" | cut -f3)
+# One record per tab, holding the pane id this script created there.
+mkdir -p "$state_dir"
+record="$state_dir/$(printf '%s' "$tab" | tr -c 'A-Za-z0-9_-' '_')"
 
-# Toggle: close any sidebar already open in this tab.
-open=$(printf '%s' "$panes" | jq -r --arg tab "$tab" '
-  .result.panes[] | select(.tab_id == $tab) |
-  select((.terminal_title_stripped // "") | contains("cc-sidebar watch")) | .pane_id')
-if [ -n "$open" ]; then
-  for pane in $open; do herdr pane close "$pane" >/dev/null; done
-  exit 0
+# Toggle off: close only the pane we recorded, and only while it still exists
+# in this tab and still shows the sidebar. Anything else falls through to
+# opening a new sidebar, which is the safe failure mode.
+if [ -f "$record" ]; then
+  recorded=$(cat "$record")
+  if [ -n "$recorded" ] &&
+    [ "$(field "$recorded" '.tab_id // empty')" = "$tab" ] &&
+    field "$recorded" '.terminal_title_stripped // ""' | grep -qF "$marker"; then
+    herdr pane close "$recorded" >/dev/null
+    rm -f "$record"
+    exit 0
+  fi
+  rm -f "$record"
 fi
+
+cwd=$(field "$target" '.foreground_cwd // .cwd // ""')
+session=$(field "$target" 'if .agent_session.agent == "claude" then .agent_session.value else "" end')
 
 # The command is typed into the new pane's shell, so only pass values that are
 # safe to embed: a session id of [A-Za-z0-9_-] and a known language.
@@ -50,19 +68,24 @@ case "$session" in
   *[!A-Za-z0-9_-]*) session="" ;;
 esac
 case "$lang" in
-  en|es) ;;
-  *) lang=es ;;
+  en | es) ;;
+  *)
+    echo "cc-sidebar-open: unsupported CC_SIDEBAR_LANG=$lang, using es" >&2
+    lang=es
+    ;;
 esac
 
-cmd="exec cc-sidebar watch --lang $lang"
+cmd="exec $marker --lang $lang"
 [ -n "$session" ] && cmd="$cmd --session $session"
 
-if [ -n "$cwd" ] && [ -d "$cwd" ]; then
-  new=$(herdr pane split "$target" --direction right --ratio 0.7 --no-focus --cwd "$cwd")
-else
-  new=$(herdr pane split "$target" --direction right --ratio 0.7 --no-focus)
-fi
-new_id=$(printf '%s' "$new" | jq -r '.result.pane.pane_id // empty')
-[ -n "$new_id" ] || { echo "cc-sidebar-open: split failed" >&2; exit 1; }
+set -- "$target" --direction right --ratio "$keep_ratio" --no-focus
+[ -n "$cwd" ] && [ -d "$cwd" ] && set -- "$@" --cwd "$cwd"
+new_id=$(herdr pane split "$@" | jq -r '.result.pane.pane_id // empty')
+[ -n "$new_id" ] || die "split failed"
 
-herdr pane run "$new_id" "$cmd" >/dev/null
+# Roll back the empty split if the sidebar cannot be started in it.
+if ! herdr pane run "$new_id" "$cmd" >/dev/null; then
+  herdr pane close "$new_id" >/dev/null 2>&1 || true
+  die "could not start the sidebar in $new_id"
+fi
+printf '%s\n' "$new_id" >"$record"
